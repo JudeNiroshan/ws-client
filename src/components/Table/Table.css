@@ -1,0 +1,52 @@
+/* Set a nice font and margin for the whole page */
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin: 0;
+  }
+  
+  /* Style the table */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Style the table caption */
+  caption {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 20px 0;
+  }
+  
+  /* Style the table header */
+  thead {
+    background-color: #006699;
+    color: #fff;
+  }
+  
+  th {
+    font-weight: bold;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  /* Style the table body */
+  tbody tr:nth-child(even) {
+    background-color: #f8f8f8;
+  }
+  
+  td {
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  
+  /* Remove hover effects */
+  tbody tr:hover {
+    background-color: inherit;
+    cursor: auto;
+  }
+  
