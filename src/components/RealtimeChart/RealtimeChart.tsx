@@ -1,17 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import "chartjs-plugin-streaming";
 import "./RealtimeChart.css";
-import moment, { Moment } from "moment";
-
 
 const Chart = require("react-chartjs-2").Chart;
 
-type Point = {
-    x: Moment;
-    y: number;
-}
 
 // {
 //     "server1": Point[],
@@ -19,27 +13,50 @@ type Point = {
 //     "server3": Point[]
 // }
 
-const RealtimeChart = (props: {chartData: Point[]}) => {
+const RealtimeChart = (props: {chartData: any}) => {
 
-    const chartColors = {
-        red: "rgb(255, 99, 132)",
-        orange: "rgb(255, 159, 64)",
-        yellow: "rgb(255, 205, 86)",
-        blue: "rgb(54, 162, 235)",
-        purple: "rgb(153, 102, 255)",
-        grey: "rgb(201, 203, 207)",
-        green: "rgb(8, 162, 49)"
-    };
+    const chartColors = [
+        "rgb(84, 33, 255)",
+        "rgb(5, 171, 57)",
+        "rgb(0, 0, 0)",
+        "rgb(248, 36, 49)"
+    ];
+    let colorIndex = 0;
 
     const color = Chart.helpers.color;
-    const datasets = {
+    const dataContainer = {
         datasets: [
             {
-                backgroundColor: color(chartColors.green).alpha(0.5).rgbString(),
-                borderColor: chartColors.green,
+                label: "d1",
+                backgroundColor: color(chartColors.at(0)).rgbString(),
+                borderColor: chartColors.at(0),
                 fill: false,
                 lineTension: 0.2,
-                data: props.chartData
+                data: [{}]
+            },
+            {
+                label: "d2",
+                backgroundColor: color(chartColors.at(1)).rgbString(),
+                borderColor: chartColors.at(1),
+                fill: false,
+                lineTension: 0.2,
+                data: [{}]
+            },
+            {
+                label: "d3",
+                backgroundColor: color(chartColors.at(2)).rgbString(),
+                borderColor: chartColors.at(2),
+                fill: false,
+                lineTension: 0.2,
+                data: [{}]
+            },
+            {
+                label: "d4",
+                backgroundColor: color(chartColors.at(3)).rgbString(),
+                borderColor: chartColors.at(3),
+                fill: false,
+                lineTension: 0.2,
+                data: [{}]
             }
         ]
     };
@@ -50,13 +67,16 @@ const RealtimeChart = (props: {chartData: Point[]}) => {
          },
         tooltips: {enabled: false},
         hover: {mode: null},
+        animation: {
+            duration: 0
+        },
         scales: {
             xAxes: [
                 {
                     type: "realtime",
                     distribution: "linear",
                     realtime: {
-                        duration: 60000,
+                        duration: 120000,
                         refresh: 1000,
                         delay: 0,
                         time: {
@@ -76,9 +96,17 @@ const RealtimeChart = (props: {chartData: Point[]}) => {
         }
     };
 
+    Object.keys(props.chartData).forEach(key => {
+        // console.log(JSON.stringify(props.chartData[key].length));
+
+        dataContainer.datasets[colorIndex++].data = [...props.chartData[key]];
+        
+    });
+    console.log(JSON.stringify(dataContainer.datasets[0].data.length));
+    
     return (
         <div className='chart-wrapper'>
-            <Line data={datasets} options={options} />
+            <Bar data={dataContainer} options={options} />
         </div>
     )
 }

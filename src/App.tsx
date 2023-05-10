@@ -3,52 +3,82 @@ import './App.css';
 import RealtimeChart from "./components/RealtimeChart/RealtimeChart";
 import Table from "./components/Table/Table";
 import moment, { Moment } from "moment";
+import { table } from 'console';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 type ServerReponse = {
   timestamp: string;
   value: number;
   hostname: string;
+  version: string;
 };
 
-type Point = {
-  x: Moment;
-  y: number;
-}
-
-
 function App() {
-  const ws = useRef<WebSocket | null>(null);
-  const [chartData, setChartData] = useState<Point[]>([]);
-  const [tableData, setTableData] = useState<any>({});
+  const rws = useRef<ReconnectingWebSocket | null>(null);
+  const [chartData, setChartData] = useState<any>({});
+  const [tableData, setTableData] = useState<any>({
+  });
 
   useEffect(() => {
     init();
-  }, [tableData]);
+  }, []);
 
   const init = () => {
-    if(ws.current == null) {
-      ws.current = new WebSocket('ws://localhost:8080/connect/timer');
-      ws.current.onopen = function () {
+    if(rws.current == null) {
+      const options = {
+        minReconnectionDelay: 200,
+        maxReconnectionDelay: 10000,
+        reconnectionDelayGrowFactor: 1,
+        connectionTimeout: 9000,
+        minUptime: 3000
+      }
+      //https://ws-server-temenos-demo.apps.ocp-dev01.lab.eng.tlv2.redhat.com/
+
+      rws.current = new ReconnectingWebSocket('ws://ws-server-temenos-demo.apps.ocp-dev01.lab.eng.tlv2.redhat.com/connect/timer', [], options);
+      // rws.current = new ReconnectingWebSocket('ws://localhost:8080/connect/timer', [], options);
+
+      rws.current.addEventListener('open', () => {
           console.log('WebSocket is open now.');
-      };
-      ws.current.onclose = function () {
+          rws.current?.send(moment().format("YYYY-MM-DDTHH:mm:ss"));
+      });
+      rws.current.addEventListener('close', () => {
           console.log('WebSocket is closed now.');
-      };
-      ws.current.onmessage = function (event) {
+      });
+      rws.current.addEventListener('message', (event: MessageEvent<string>) => {
           const responseData: ServerReponse = JSON.parse(event.data);
-          chartData.push({
+          console.log (responseData);
+          const key = responseData.hostname + ':' + responseData.version;
+          const server = chartData[key];
+          
+          if(!server) {
+            chartData[key] = [{
               x: moment(responseData.timestamp),
               y: responseData.value,
-          })
-          if(chartData.length > 100) {
-              chartData.shift();
+            }];
+            
+            setChartData(chartData);
+
+          }else{
+            server.push({
+              x: moment(responseData.timestamp),
+              y: responseData.value,
+            });
+            if(server.length > 130) {
+              server.shift();
+            }
           }
-          const tmp = Object.assign({}, tableData);
-          tmp[responseData.hostname] = moment(responseData.timestamp)
+
+          // console.log("jude"+JSON.stringify(chartData));
+          // console.log("tableData==="+JSON.stringify(tableData));
+
+          const tmp = JSON.parse(JSON.stringify(tableData));
+          tableData[key] = moment(responseData.timestamp)
+          // console.log("tmp==="+JSON.stringify(tmp));
           setTableData(tmp);
-      };
+      });
+      
       return () => {
-          ws.current?.close();
+          rws.current?.close();
       };
     }
     

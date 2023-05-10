@@ -3,21 +3,20 @@ import React,{ useEffect } from 'react';
 import './Table.css'
 
 const Table = (props: {tableData: any}) => {
-    const { tableData } = props;
 
     return (
       <table>
         <thead>
           <tr>
-            <th>Hostname</th>
+            <th>Server hostname : Version</th>
             <th>Last Connected</th>
           </tr>
         </thead>
         <tbody>
-            {tableData && Object.keys(tableData).map((hostname) => (
+            {props.tableData && Object.keys(props.tableData).map((hostname) => (
                 <tr key={hostname}>
                     <td>{hostname}</td>
-                    <td>{moment(tableData[hostname]).toISOString()}</td>
+                    <td><strong>{moment(props.tableData[hostname]).format("DD MMMM YYYY HH:mm:ss")}</strong></td>
                 </tr>
             ))}
         </tbody>
